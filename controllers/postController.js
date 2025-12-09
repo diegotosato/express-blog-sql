@@ -24,24 +24,28 @@ function show(req, res) {
     //converto l'ID in numero
     const id = Number(req.params.id)
 
-    //filtro il menu ed estraggo il sinoglo post il cui id è uguale ad id
-    const findPost = menu.find(post => post.id === id)
+    const postSql = "SELECT * FROM posts WHERE id = ?"
 
-    //restituisco in formato json il post trovato
-    // res.json(findPost)
+    const tagsSql = `
+    SELECT *
+    FROM tags
+    JOIN post_tag ON post_tag.tag_id = tags.id
+    WHERE post_tag.post_id = ?`
 
-    //se il post non esiste, allora setto lo status su 404 (not found), e restituisco un oggetto che contiene status, errore e un messaggio
-    if (!findPost) {
-        res.sendStatus(404)
+    connection.query(postSql, [id], (err, postResponse) => {
+        if (err) return res.status(500).json({ error: true, message: err.message })
+        if (postResponse.length === 0) return res.status(404).json({ error: true, message: 'not found' })
 
-        return res.json({
-            status: 404,
-            error: 'Not found',
-            message: 'Il post non esiste'
+        const post = postResponse[0]
+
+        connection.query(tagsSql, [id], (err, tagsResponse) => {
+            if (err) return res.status(500).json({ error: true, message: err.message })
+
+            post.tags = tagsResponse
+
+            res.json(post)
         })
-    }
-
-    res.json(findPost)
+    })
 }
 
 
