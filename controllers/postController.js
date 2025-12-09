@@ -137,29 +137,12 @@ function destroy(req, res) {
     //converto l'ID in numero
     const id = Number(req.params.id)
 
-    //filtro il menu ed estraggo il sinoglo post il cui id è uguale ad id
-    const deletePost = menu.find(post => post.id === id)
+    const deleteSql = "DELETE FROM posts WHERE id = ?"
 
-    //se il post non esiste, allora setto lo status su 404 (not found), e restituisco un oggetto che contiene status, errore e un messaggio
-    if (!deletePost) {
-        res.sendStatus(404)
-
-        return res.json({
-            status: 404,
-            error: 'Not found',
-            message: 'Il post non esiste'
-        })
-    }
-
-    //metodo splice per rimuovere il post desiderato
-    //recupero la posizione nell'array del post da eliminare, dichiaro dopo la virgola quanti elementi rimuovere
-    menu.splice(menu.indexOf(deletePost), 1);
-
-    //loggo in console l'array aggiornato
-    console.log(menu);
-
-    //rispondo on un errore 204 per indicare che la cancellazione sia avvenuta con successo
-    res.sendStatus(204)
+    connection.query(deleteSql, [id], (err, response) => {
+        if (err) return res.status(500).json({ error: true, message: err.message })
+        res.status(204)
+    })
 
 }
 
