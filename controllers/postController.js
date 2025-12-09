@@ -1,31 +1,18 @@
 //importo il menu
 const { error } = require('console')
+const connection = require('../database/db')
 
 //preparo tutte le funzioni
 
 //index (.get)
 function index(req, res) {
 
-    // console.log(req.query.tipo_piatto);
+    const sql = "SELECT * FROM posts"
 
-    //Implementare un filtro di ricerca nella index che mostri solo i post che hanno un determinato Tag
-
-    //racchiudo la mia chiave della query string in una variabile
-    const plateType = req.query.piatto
-    // console.log(plateType);
-
-    //variabile per il menu filtrato (valore di partenza menu così mi restituisce tutto l'array se non trova elementi da filtrare)
-    let filteredMenu = menu
-
-    //se il valore della mia query esite, allora filtro l'array di partenza, e restituisco gli oggetti che contengono il mio valore
-    if (req.query.piatto) {
-        // console.log('ho trovato il tuo ingrediente');
-        filteredMenu = menu.filter(item => item.tags.includes(plateType))
-        console.log(filteredMenu);
-
-    }
-
-    res.json(filteredMenu)
+    connection.query(sql, (err, response) => {
+        if (err) return res.status(500).json({ error: true, message: err.message })
+        res.json(response)
+    })
 }
 
 
